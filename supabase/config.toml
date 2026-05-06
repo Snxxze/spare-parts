@@ -1,0 +1,7 @@
+project_id = "ehxkrrlosufvhbzbeigx"
+
+[functions.get-roster]
+verify_jwt = false
+
+[functions.sync-parts]
+verify_jwt = false
