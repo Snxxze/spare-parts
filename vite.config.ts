@@ -9,7 +9,9 @@ export default defineConfig({
     port: 8080,
   },
   plugins: [react()],
+  envPrefix: ["VITE_", "SUPABASE_"],
   resolve: {
+
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },

@@ -1,5 +1,5 @@
 import { corsHeaders } from "../_shared/cors.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.95.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SHEET_ID = "151cXSlyI_abwUt6tsmks1NnbMAAQpPv-tg-2CwlpCYA";
 const SHEETS = ["กลุ่มที่ 1", "กลุ่มที่ 2"];

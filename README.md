@@ -44,8 +44,8 @@
 3. **ตั้งค่า Environment Variables**
    สร้างไฟล์ `.env` ในโฟลเดอร์ `frontend` และกำหนดค่าดังนี้:
    ```env
-   VITE_SUPABASE_URL=https://your-project-ref.supabase.co
-   VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
+   SUPABASE_URL=https://your-project-ref.supabase.co
+   SUPABASE_PUBLISHABLE_KEY=your-anon-key
    ```
 
 4. **เริ่มรันโปรเจกต์ (Local Development)**
