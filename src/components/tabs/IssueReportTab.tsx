@@ -120,6 +120,10 @@ export default function IssueReportTab() {
 
   const parseImage = (reason: string | null) => {
     if (!reason) return null;
+    if (reason.includes("||FILE_URL||")) {
+      const p = reason.split("||FILE_URL||");
+      return p[1] || null;
+    }
     const parts = reason.split("||FILE||");
     return parts[1] || null;
   };

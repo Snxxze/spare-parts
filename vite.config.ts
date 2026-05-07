@@ -9,7 +9,7 @@ export default defineConfig({
     port: 8080,
   },
   plugins: [react()],
-  envPrefix: ["VITE_", "SUPABASE_"],
+  envPrefix: ["VITE_", "SB_"],
   resolve: {
 
     alias: {

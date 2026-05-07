@@ -76,8 +76,6 @@ export default function Dashboard() {
   // ถ้ายังไม่รู้เลยว่ามีเซสชันไหม ให้เงียบไว้ก่อน (หรือโชว์ Spinner กลางจอแบบ Minimal)
   if (!sessionChecked) return null;
 
-  const fullAccess = hasFullAccess(role);
-
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card sticky top-0 z-10">
@@ -118,19 +116,15 @@ export default function Dashboard() {
             <TabsTrigger value="stock" className="gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5">
               <ClipboardList className="h-4 w-4" /> สินค้าคงคลัง
             </TabsTrigger>
-            {(loading || fullAccess) && (
-              <>
-                <TabsTrigger value="approvals" disabled={loading} className="gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5">
-                  <ShieldCheck className="h-4 w-4" /> อนุมัติเบิก
-                </TabsTrigger>
-                <TabsTrigger value="issues" disabled={loading} className="gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5">
-                  <History className="h-4 w-4" /> ประวัติเบิกจ่าย
-                </TabsTrigger>
-                <TabsTrigger value="refills" disabled={loading} className="gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5">
-                  <BarChart3 className="h-4 w-4" /> รายงานสรุป
-                </TabsTrigger>
-              </>
-            )}
+            <TabsTrigger value="approvals" className="gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5">
+              <ShieldCheck className="h-4 w-4" /> อนุมัติเบิก
+            </TabsTrigger>
+            <TabsTrigger value="issues" className="gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5">
+              <History className="h-4 w-4" /> ประวัติเบิกจ่าย
+            </TabsTrigger>
+            <TabsTrigger value="refills" className="gap-1.5 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5">
+              <BarChart3 className="h-4 w-4" /> รายงานสรุป
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="parts" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
@@ -142,19 +136,15 @@ export default function Dashboard() {
           <TabsContent value="stock" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
             <StockReportTab />
           </TabsContent>
-          {fullAccess && (
-            <>
-              <TabsContent value="approvals" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
-                <ApprovalsTab />
-              </TabsContent>
-              <TabsContent value="issues" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
-                <IssueReportTab />
-              </TabsContent>
-              <TabsContent value="refills" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
-                <RefillReportTab />
-              </TabsContent>
-            </>
-          )}
+          <TabsContent value="approvals" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
+            <ApprovalsTab />
+          </TabsContent>
+          <TabsContent value="issues" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
+            <IssueReportTab />
+          </TabsContent>
+          <TabsContent value="refills" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
+            <RefillReportTab />
+          </TabsContent>
         </Tabs>
       </main>
     </div>
