@@ -40,16 +40,6 @@ export default function RequisitionTab() {
   const [submitting, setSubmitting] = useState(false);
   const [file, setFile] = useState<File | null>(null);
 
-  // Helper สำหรับแปลงไฟล์เป็น Base64 สำหรับงาน Demo
-  const fileToBase64 = (f: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(f);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
   useEffect(() => {
     // กรณีใช้ Supabase:
     supabase.from("parts")
@@ -80,8 +70,21 @@ export default function RequisitionTab() {
 
       let finalReason = reason;
       if (file) {
-        const attachmentData = await fileToBase64(file);
-        finalReason = `${reason}||FILE||${attachmentData}`;
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `evidence/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('requisitions')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('requisitions')
+          .getPublicUrl(filePath);
+
+        finalReason = `${reason}||FILE_URL||${publicUrl}`;
       }
 
       const { data: req, error } = await supabase

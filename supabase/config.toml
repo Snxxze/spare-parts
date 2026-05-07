@@ -1,4 +1,4 @@
-project_id = "ehxkrrlosufvhbzbeigx"
+project_id = "sgpzawqccoxvueotkpth"
 
 [functions.get-roster]
 verify_jwt = false

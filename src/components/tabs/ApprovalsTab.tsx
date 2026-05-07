@@ -14,6 +14,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { AlertTriangle } from "lucide-react";
 
 interface Req {
   id: string;
@@ -23,20 +34,22 @@ interface Req {
   status: string;
   created_at: string;
   profiles?: { full_name: string | null; email: string | null } | null;
-  requisition_items: { quantity: number; parts: { code: string; name: string } }[];
+  requisition_items: { quantity: number; parts: { code: string; name: string; quantity: number } }[];
 }
 
 export default function ApprovalsTab() {
   const [reqs, setReqs] = useState<Req[]>([]);
   const [filter, setFilter] = useState<"pending" | "all">("pending");
   const [loading, setLoading] = useState(true);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingId, setPendingId] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
     try {
       let q = supabase
         .from("requisitions")
-        .select("id,doc_number,user_id,reason,status,created_at,requisition_items(quantity,parts(code,name))")
+        .select("id,doc_number,user_id,reason,status,created_at,requisition_items(quantity,parts(code,name,quantity))")
         .order("created_at", { ascending: false });
       if (filter === "pending") q = q.eq("status", "pending");
       const { data, error } = await q;
@@ -58,6 +71,10 @@ export default function ApprovalsTab() {
   // Helper สำหรับแกะข้อมูล Reason และ Image
   const parseReason = (rawReason: string | null) => {
     if (!rawReason) return { text: "", image: null };
+    if (rawReason.includes("||FILE_URL||")) {
+      const p = rawReason.split("||FILE_URL||");
+      return { text: p[0], image: p[1] || null };
+    }
     const parts = rawReason.split("||FILE||");
     return {
       text: parts[0],
@@ -66,6 +83,16 @@ export default function ApprovalsTab() {
   };
 
   const review = async (id: string, status: "approved" | "rejected") => {
+    if (status === "approved" && !confirmOpen) {
+      const req = reqs.find(r => r.id === id);
+      const insufficient = req?.requisition_items.some(it => it.quantity > it.parts.quantity);
+      if (insufficient) {
+        setPendingId(id);
+        setConfirmOpen(true);
+        return;
+      }
+    }
+
     const { data: { session } } = await supabase.auth.getSession();
     const { error } = await supabase
       .from("requisitions")
@@ -73,6 +100,8 @@ export default function ApprovalsTab() {
       .eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(status === "approved" ? "ยืนยันการเบิกแล้ว" : "ปฏิเสธการเบิกแล้ว");
+    setConfirmOpen(false);
+    setPendingId(null);
     load();
   };
 
@@ -143,10 +172,17 @@ export default function ApprovalsTab() {
               <div className="flex gap-4 items-start">
                 <div className="flex-1 rounded border bg-muted/30 p-2 text-sm min-h-[80px]">
                   {r.requisition_items.map((it, i) => (
-                    <div key={i} className="flex justify-between">
-                      <span className="font-mono">{it.parts.code}</span>
-                      <span className="flex-1 mx-2">{it.parts.name}</span>
-                      <span>x {it.quantity}</span>
+                    <div key={i} className="flex flex-col border-b border-border/40 last:border-0 py-1.5">
+                      <div className="flex justify-between">
+                        <span className="font-mono font-medium text-primary">{it.parts.code}</span>
+                        <span className="flex-1 mx-2 text-muted-foreground truncate">{it.parts.name}</span>
+                        <span className="font-bold">x {it.quantity}</span>
+                      </div>
+                      {it.quantity > it.parts.quantity && (
+                        <span className="text-[10px] text-destructive font-bold animate-pulse mt-0.5">
+                          ⚠️ สต็อกไม่พอ (คงเหลือ: {it.parts.quantity})
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -188,6 +224,32 @@ export default function ApprovalsTab() {
       )}
       </CardContent>
     </Card>
+
+    <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <div className="flex items-center gap-2 text-destructive mb-2">
+            <AlertTriangle className="h-5 w-5" />
+            <AlertDialogTitle>ยืนยันการอนุมัติ (สต็อกไม่พอ)</AlertDialogTitle>
+          </div>
+          <AlertDialogDescription className="text-base">
+            ตรวจพบว่า **อะไหล่บางรายการมีไม่พอในสต็อก** 
+            หากคุณกดยืนยัน ระบบจะทำการหักสต็อกจน **ติดลบ**
+            <br /><br />
+            คุณต้องการดำเนินการต่อหรือไม่?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => { setConfirmOpen(false); setPendingId(null); }}>ยกเลิก</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={() => pendingId && review(pendingId, "approved")}
+            className="bg-destructive hover:bg-destructive/90"
+          >
+            ยืนยันการเบิก (สต็อกติดลบ)
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
   );
 }

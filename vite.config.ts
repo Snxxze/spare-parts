@@ -9,11 +9,23 @@ export default defineConfig({
     port: 8080,
   },
   plugins: [react()],
-  envPrefix: ["VITE_", "SUPABASE_"],
+  envPrefix: ["VITE_", "SB_"],
   resolve: {
-
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-supabase": ["@supabase/supabase-js"],
+          "vendor-ui": ["@radix-ui/react-dialog", "@radix-ui/react-select", "@radix-ui/react-tabs", "@radix-ui/react-popover", "@radix-ui/react-alert-dialog"],
+          "vendor-charts": ["recharts"],
+          "vendor-misc": ["date-fns", "lucide-react", "sonner", "html5-qrcode"],
+        },
+      },
     },
   },
 });

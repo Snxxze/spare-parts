@@ -28,13 +28,12 @@ export async function findEmployee(name: string): Promise<Employee | undefined> 
 // Deterministic email from name (sha256 hex prefix) so the same name always
 // resolves to the same Supabase auth user.
 export async function nameToEmail(name: string): Promise<string> {
-  const buf = new TextEncoder().encode(name.trim());
-  const hash = await crypto.subtle.digest("SHA-256", buf);
-  const hex = Array.from(new Uint8Array(hash))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("")
-    .slice(0, 24);
-  return `u_${hex}@octopus.local`;
+  // Encode name to handle Thai characters safely for email local part
+  const cleanName = btoa(encodeURIComponent(name.trim()))
+    .replace(/[+/=]/g, "")
+    .toLowerCase()
+    .slice(0, 20);
+  return `emp_${cleanName}@spareparts-system.com`;
 }
 
 export const pinToPassword = (pin: string) => `Octo-pin-${pin}`;
